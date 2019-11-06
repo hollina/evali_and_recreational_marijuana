@@ -1,7 +1,7 @@
-global root_path "~/Desktop/lung_damage/"
+global root_path "~/Documents/GitHub/evali_and_recreational_marijuana"
 
 
-import excel "/Users/hollinal/Desktop/lung_damage/cdc_data.xlsx", sheet("Sheet1") clear
+import excel "$root_path/cdc_data.xlsx", sheet("Sheet1") clear
 gen number = _n
 gen odd = mod(number,2)
 gen id = _n
@@ -158,7 +158,14 @@ gen mid_point = (upper_bound+lower_bound)/2
 gen cases_per_million = (mid_point/pop_total)*1000000
 
 compress
+drop _merge
 save "/Users/hollinal/Desktop/lung_damage/data_for_R.dta", replace
+
+ import excel "/Users/hollina/Documents/GitHub/evali_and_recreational_marijuana/ecigarette_use_2017.xlsx", sheet("Sheet1") firstrow clear
+ merge 1:1 state using  "$root_path/data_for_R.dta", 
+keep if _merge == 3
+compress 
+save "$root_path/data_for_R.dta", replace
 
 /*
 sumup cases_per_100k [aw = pop_total], by(rm_disp)

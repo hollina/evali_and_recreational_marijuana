@@ -1,10 +1,14 @@
+# Clear memory
 rm(list=ls())
 
+# Load libraries
+library("cowplot")
 library("tidyverse")
 library("haven")
+library("estimatr")
 
 # Import data
-marijuana_data <- read_dta("/Users/hollinal/Desktop/lung_damage/data_for_R.dta")
+marijuana_data <- read_dta("~/Documents/GitHub/evali_and_recreational_marijuana/data_for_R.dta")
 
 # Make a variable equal to 1 if non-marijuana, 2 if medical
 marijuana_data <- marijuana_data %>%
@@ -13,38 +17,69 @@ marijuana_data <- marijuana_data %>%
 # Make the variable equal to 3 if recreational marijuana
 marijuana_data$mj_policy <- ifelse(marijuana_data$rm_disp == 1, 3, marijuana_data$mj_policy)
 
+# Calculate group means of EVALI by MJ policy
 means <- marijuana_data %>%
   group_by(mj_policy) %>%
   summarise(
     Avg = mean(cases_per_million)
   )
 
+# Difference between Rec and Medical
+model_rm_mm <- lm_robust(cases_per_million ~ rm_disp, data = subset(marijuana_data, mm == 1), se_type = "stata")
+summary(model_rm_mm)
+
+# Difference between Rec and prohibition
+model_rm_prohib <- lm_robust(cases_per_million ~ rm_disp, data = subset(marijuana_data, mm == 0 | rm_disp ==1), se_type = "stata")
+summary(model_rm_prohib)
+
+# Difference between medical and prohibition
+model_mm_prohib <- lm_robust(cases_per_million ~ mm, data = subset(marijuana_data, mm == 1 & rm_disp == 0 | mm == 0), se_type = "stata")
+summary(model_mm_prohib)
+
+# Calculate group means of e-cigarette use by MJ policy
+means_ecig <- marijuana_data %>%
+  group_by(mj_policy) %>%
+  summarise(
+    Avg = mean(ecigarette_use)
+  )
+# Difference between Rec and Medical
+model_rm_mm_ecig <- lm_robust(ecigarette_use ~ rm_disp, data = subset(marijuana_data, mm == 1), se_type = "stata")
+summary(model_rm_mm_ecig)
+
+# Difference between Rec and prohibition
+model_rm_prohib_ecig <- lm_robust(ecigarette_use ~ rm_disp, data = subset(marijuana_data, mm == 0 | rm_disp ==1), se_type = "stata")
+summary(model_rm_prohib_ecig)
+
+# Difference between medical and prohibition
+model_mm_prohib_ecig <- lm_robust(ecigarette_use ~ mm, data = subset(marijuana_data, mm == 1 & rm_disp == 0 | mm == 0), se_type = "stata")
+summary(model_mm_prohib_ecig)
+# Count states by MJ policy
 count <- marijuana_data %>%
   group_by(mj_policy) %>%
   tally()
-  
+
+# Make a histogram of EVALI case rate
 hist <- ggplot(marijuana_data, aes(x = cases_per_million)) +
   geom_histogram(fill = "white", color = "black") +
   theme_classic() +
   labs(x="Cases per million population", y = "Count", title = "Histogram of state EVALI case rate")
-  
-ggsave("/Users/hollinal/Desktop/lung_damage/histogram.pdf", plot = hist,dpi = 1200, width = 6, height = 6, units = "in")
+hist 
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/histogram_evali.pdf", plot = hist,dpi = 1200, width = 6, height = 6, units = "in")
 
+# Make a histogram of e-cigarette case rate
+hist_ecig <- ggplot(marijuana_data, aes(x = ecigarette_use)) +
+  geom_histogram(fill = "white", color = "black") +
+  theme_classic() +
+  labs(x="Cases per million population", y = "Count", title = "Histogram of e-cigarette prevalence")
+hist_ecig
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/histogram_ecigarette.pdf", plot = hist_ecig,dpi = 1200, width = 6, height = 6, units = "in")
 
-# Make a quick regression of the difference by state type
-t.test()
-library("viridis")
-
-#cbPalette <- viridis(3) #c("green", "#E69F00", "#56B4E9")
-cbPalette <- c("#3F3DCB", 
-              "#AEA6A6", 
-               "#0CC693")
+# Make a custom color palette 
 cbPalette <- c("#3F3DCB", 
                "#d6d4d3", 
                "#0CC693")
 
-#cbPalette <-c("#f1a340","#f7f7f7", "#998ec3")
-
+# Make a dot plot of EVALI case rate, highlighting state MJ policy
 dot_plot <- ggplot(marijuana_data, aes(x = cases_per_million, y = reorder(state, -cases_per_million))) +
   geom_vline(data=filter(marijuana_data, mj_policy==3), aes(xintercept=mean(cases_per_million)), colour=cbPalette[3], size = 1.5, linetype = 'longdash') + 
   geom_vline(data=filter(marijuana_data, mj_policy==2), aes(xintercept=mean(cases_per_million)), colour=cbPalette[2], size = 1.5, linetype = 'longdash') + 
@@ -73,26 +108,16 @@ dot_plot <- ggplot(marijuana_data, aes(x = cases_per_million, y = reorder(state,
 
 dot_plot
 
-#        legend.title = element_blank()) +
-
-#  geom_point(aes(color=as.factor(mj_policy), shape = as.factor(mj_policy)), size=5) + 
-#  theme_classic() 
-#+ 
-#  scale_shape(solid = TRUE)
-library("pBrackets")
-grid.locator(unit="native") 
-
+# Make a bar plot of mean EVALI case rate by state MJ policy
 bar_plot <- ggplot(marijuana_data, aes(x = as.factor(mj_policy), y = cases_per_million, fill=as.factor(mj_policy),color=as.factor(mj_policy))) + 
   theme_bw() + 
   geom_bar(stat = "summary", fun.y = "mean",aes(fill=as.factor(mj_policy))) +
   coord_flip() +
   theme_classic() + 
   scale_color_manual(breaks = c("1", "2", "3"),
-                     values=c("black", "black", "black"),
-  ) + 
+                     values=c("black", "black", "black")) + 
   scale_fill_manual(breaks = c("1", "2", "3"),
-                    values=cbPalette, 
-  ) +
+                    values=cbPalette) +
   scale_y_continuous(limits = c(0,40)) +
   theme(legend.position = "none") +
   labs(y="Cases per million population", x = "") +
@@ -141,50 +166,134 @@ bar_plot <- ggplot(marijuana_data, aes(x = as.factor(mj_policy), y = cases_per_m
         title=element_text(size = 15),
         plot.caption = element_text(hjust = 0))
 
-
 bar_plot
-#+
-#  geom_bracket(
-#    xmin = "1", xmax = "2", y.position = 30,
-#    label = "t-test, p < 0.05"
-#  )
 
-
-
-#dev.off()
-
-
-
-library("cowplot")
-
+# Combine the two plots
 combined_plot <- plot_grid(dot_plot, bar_plot, ncol = 1, align = 'v', rel_heights = c(2,1))
 combined_plot
-ggsave("/Users/hollinal/Desktop/lung_damage/exhibit_1.pdf", plot = combined_plot,dpi = 1200, width = 6, height = 15, units = "in")
 
-#png(file = "/Users/hollinal/Desktop/lung_damage/barplot.png", width = 6, height = 12, units = "in", res = 1200)
-combined_plot
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_1.pdf", plot = combined_plot,dpi = 1200, width = 6, height = 15, units = "in")
+
+# Make a dot plot of e-cigarette use, highlighting state MJ policy
+dot_plot_ecig <- ggplot(marijuana_data, aes(x = ecigarette_use, y = reorder(state, -ecigarette_use))) +
+  geom_vline(data=filter(marijuana_data, mj_policy==3), aes(xintercept=mean(ecigarette_use)), colour=cbPalette[3], size = 1.5, linetype = 'longdash') + 
+  geom_vline(data=filter(marijuana_data, mj_policy==2), aes(xintercept=mean(ecigarette_use)), colour=cbPalette[2], size = 1.5, linetype = 'longdash') + 
+  geom_vline(data=filter(marijuana_data, mj_policy==1), aes(xintercept=mean(ecigarette_use)), colour=cbPalette[1], size = 1.5, linetype = 'longdash') + 
+  geom_point(aes(fill=as.factor(mj_policy),shape=as.factor(mj_policy)), size=4) + 
+  theme_classic() + 
+  scale_fill_manual(breaks = c("1", "2", "3"),
+                    values=cbPalette,
+                    name = "State marijuana policy",
+                    labels = c("Medicial", "Prohibition", "Recreational")) +
+  scale_shape_manual(breaks = c("1", "2", "3"),
+                     values=c(21,22,23),
+                     name = "State marijuana policy",
+                     labels = c("Medicial","Prohibition",  "Recreational")) +
+  theme(legend.position = c(.8, 0.9)) +
+  scale_x_continuous(limits = c(0,9)) +
+  labs(x="", 
+       y = "",
+       title = "Prevalence of e-cigarette use is similar across\n states with different marijuana policies.\n") +
+  theme(axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 10),
+        legend.title=element_text(size=15), 
+        legend.text=element_text(size=15),
+        axis.title.x=element_text(size = 18),
+        title=element_text(size = 14))
+
+dot_plot_ecig
+
+# Make a bar plot of mean e-cigarete use by state MJ policy
+bar_plot_ecig <- ggplot(marijuana_data, aes(x = as.factor(mj_policy), y = ecigarette_use, fill=as.factor(mj_policy),color=as.factor(mj_policy))) + 
+  geom_bar(stat = "summary", fun.y = "mean",aes(fill=as.factor(mj_policy))) +
+  coord_flip() +
+  theme_classic() + 
+  scale_color_manual(breaks = c("1", "2", "3"),
+                     values=c("black", "black", "black")) + 
+  scale_fill_manual(breaks = c("1", "2", "3"),
+                    values=cbPalette) +
+  scale_y_continuous(limits = c(0,9)) +
+  theme(legend.position = "none") +
+  labs(y="Prevalence of e-cigarette use (0-100%)", x = "") +
+  scale_x_discrete(labels = c("Medicial\n (N = 26)", "Prohibition \n (N = 18)",  " Recreational\n (N = 7)")) +
+  annotate("text", label = "  0.4", x = 2.55, y = 5.8 , color = "black", size = 5) +
+  geom_segment(x = 3, xend = 2.1, 
+               y = 5.5, yend = 5.5,
+               colour = "black") +
+  geom_segment(x = 3, xend = 3, 
+               y = 5, yend =5.5 ,
+               colour = "black") +
+  geom_segment(x = 2.1, xend = 2.1, 
+               y = 5, yend = 5.5,
+               colour = "black") +
+  annotate("text", label = " -0.7", x = 1.5, y = 5.8, color = "black", size = 5) +
+  geom_segment(x = 1, xend = 1.9, 
+               y = 5.5, yend = 5.5,
+               colour = "black") +
+  geom_segment(x = 1, xend = 1, 
+               y = 5, yend =5.5 ,
+               colour = "black") +
+  geom_segment(x = 1.9, xend = 1.9, 
+               y = 5, yend = 5.5,
+               colour = "black")  +
+  annotate("text", label = "0.3", x = 2, y = 7.5, color = "black", size = 5) +
+  geom_segment(x = 1, xend = 3, 
+               y = 7, yend = 7,
+               colour = "black") +
+  geom_segment(x = 1, xend = 1, 
+               y = 6.5, yend =7 ,
+               colour = "black") +
+  geom_segment(x = 3, xend = 3, 
+               y = 6.5, yend = 7,
+               colour = "black")  +
+  theme(axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 12, angle = 90, hjust = .5)) +
+  labs(title="Average e-cig use by state marijuana policy",
+       caption=
+         "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state
+       to be a recreational marijuana state if it had at least one 
+       recreational dispensary open in January 2019. Results
+       are robust to considering any state with an effective
+       recreational marijuana law as of 2019 (AK, CA, CO, DC,
+       ME, MA, MI, NV, OR, VT, WA) to be a recreational state.") +
+  theme(axis.title.x=element_text(size = 18),
+        title=element_text(size = 15),
+        plot.caption = element_text(hjust = 0))
+
+bar_plot_ecig
+
+# Combine the two plots
+combined_plot_ecig <- plot_grid(dot_plot_ecig, bar_plot_ecig, ncol = 1, align = 'v', rel_heights = c(2,1))
+combined_plot_ecig
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_2.pdf", plot = combined_plot_ecig,dpi = 1200, width = 6, height = 15, units = "in")
+
+# Scatter EVALI case  rate against e-cigarette use
+scatterplot <- ggplot(marijuana_data, aes(y = cases_per_million, x = ecigarette_use)) +
+  geom_point(fill = "white", color = "black", size = 3) +
+  geom_smooth(method='lm') +
+  theme_classic() +
+  labs(y="EVALI cases per million population", 
+       x = "Prevalence of e-cigarette use (0-100%)", 
+       title = "There is no discernable relationship between\n EVALI case rate and e-cigarette use",
+       caption=
+         "Note: Results are robust to weighting by state population.") +
+  theme(axis.title.x=element_text(size = 18),
+        title=element_text(size = 15),
+        plot.caption = element_text(hjust = 0))
+scatterplot
+
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_3.pdf", plot = scatterplot,dpi = 1200, width = 6, height = 4, units = "in")
+
+#  EVALI case  rate v e-cigarette use
+model_evali_ecig <- lm_robust(cases_per_million ~ ecigarette_use, data = marijuana_data, se_type = "stata")
+summary(model_evali_ecig)
+
+#  EVALI case  rate v e-cigarette use. Weighted by population.?
+model_evali_ecig_weighted <- lm_robust(cases_per_million ~ ecigarette_use, data = marijuana_data, se_type = "stata", weights = population)
+summary(model_evali_ecig_weighted)
 
 
-
-# RML - MML
-#grid.brackets(140, 260, 140, 285, lwd = 1, type = 1)
-
-# RML - None
-#grid.brackets(160, 260, 160, 315, lwd = 1, type = 1)
-
-# RML - MML
-#grid.brackets(180, 285, 180, 315, lwd = 1, type = 1)
-
-#dev.off()
-
-
-
-#use "/Users/hollinal/Desktop/lung_damage/data_for_R.dta", clear
-#reg cases_per_million i.rm_disp if rm_disp == 1 | mm == 0, robus
 #reg cases_per_million i.rm_disp if rm_disp == 1 | mm == 0, robust
 #reg cases_per_million i.rm_disp if rm_disp == 1 | mm == 1, robust
 #reg cases_per_million i.mm if rm_disp == 1 | mm == 1, robust
 #reg cases_per_million i.mm if rm_disp == 0, robust
-#bro if rm_disp == 1
-#bro if rm == 1
-#ggsave("/Users/hollinal/Desktop/lung_damage/combined_plot.pdf", plot = combined_plot,dpi = 1200, width = 6, height = 12, units = "in")
