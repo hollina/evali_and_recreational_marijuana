@@ -65,6 +65,7 @@ hist <- ggplot(marijuana_data, aes(x = cases_per_million)) +
   labs(x="Cases per million population", y = "Count", title = "Histogram of state EVALI case rate")
 hist 
 ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/histogram_evali.pdf", plot = hist,dpi = 1200, width = 6, height = 6, units = "in")
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/histogram_evali.png", plot = hist,dpi = 1200, width = 6, height = 6, units = "in")
 
 # Make a histogram of e-cigarette case rate
 hist_ecig <- ggplot(marijuana_data, aes(x = ecigarette_use)) +
@@ -73,6 +74,7 @@ hist_ecig <- ggplot(marijuana_data, aes(x = ecigarette_use)) +
   labs(x="Cases per million population", y = "Count", title = "Histogram of e-cigarette prevalence")
 hist_ecig
 ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/histogram_ecigarette.pdf", plot = hist_ecig,dpi = 1200, width = 6, height = 6, units = "in")
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/histogram_ecigarette.png", plot = hist_ecig,dpi = 1200, width = 6, height = 6, units = "in")
 
 # Make a custom color palette 
 cbPalette <- c("#3F3DCB", 
@@ -173,6 +175,7 @@ combined_plot <- plot_grid(dot_plot, bar_plot, ncol = 1, align = 'v', rel_height
 combined_plot
 
 ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_1.pdf", plot = combined_plot,dpi = 1200, width = 6, height = 15, units = "in")
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_1.png", plot = combined_plot,dpi = 1200, width = 6, height = 15, units = "in")
 
 # Make a dot plot of e-cigarette use, highlighting state MJ policy
 dot_plot_ecig <- ggplot(marijuana_data, aes(x = ecigarette_use, y = reorder(state, -ecigarette_use))) +
@@ -266,32 +269,41 @@ bar_plot_ecig
 combined_plot_ecig <- plot_grid(dot_plot_ecig, bar_plot_ecig, ncol = 1, align = 'v', rel_heights = c(2,1))
 combined_plot_ecig
 ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_2.pdf", plot = combined_plot_ecig,dpi = 1200, width = 6, height = 15, units = "in")
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_2.png", plot = combined_plot_ecig,dpi = 1200, width = 6, height = 15, units = "in")
 
-# Scatter EVALI case  rate against e-cigarette use
-scatterplot <- ggplot(marijuana_data, aes(y = cases_per_million, x = ecigarette_use)) +
-  geom_point(fill = "white", color = "black", size = 3) +
-  geom_smooth(method='lm') +
-  theme_classic() +
-  labs(y="EVALI cases per million population", 
-       x = "Prevalence of e-cigarette use (0-100%)", 
-       title = "There is no discernable relationship between\n EVALI case rate and e-cigarette use",
-       caption=
-         "Note: Results are robust to weighting by state population.") +
-  theme(axis.title.x=element_text(size = 18),
-        title=element_text(size = 15),
-        plot.caption = element_text(hjust = 0))
-scatterplot
-
-ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_3.pdf", plot = scatterplot,dpi = 1200, width = 6, height = 4, units = "in")
 
 #  EVALI case  rate v e-cigarette use
 model_evali_ecig <- lm_robust(cases_per_million ~ ecigarette_use, data = marijuana_data, se_type = "stata")
 summary(model_evali_ecig)
 
-#  EVALI case  rate v e-cigarette use. Weighted by population.?
+## Clean up a little bit (optional)
+colnames(pred_df) <- gsub("fit.", "", colnames(pred_df))
+
+#  EVALI case  rate v e-cigarette use. Weighted by population.
 model_evali_ecig_weighted <- lm_robust(cases_per_million ~ ecigarette_use, data = marijuana_data, se_type = "stata", weights = population)
 summary(model_evali_ecig_weighted)
 
+# Scatter EVALI case  rate against e-cigarette use
+scatterplot <- ggplot(marijuana_data, aes(y = cases_per_million, x = ecigarette_use)) +
+  geom_point(fill = "white", color = "white", size = 3) +
+  geom_smooth(method='lm_robust') +
+  geom_text(aes(label = state),hjust=0, vjust=0, size = 3) +
+  theme_classic() +
+  labs(y="EVALI cases per million population", 
+       x = "Prevalence of e-cigarette use (0-100%)", 
+       title = "There is no discernable relationship between EVALI case rate\n and e-cigarette use",
+       caption=
+         "Note: Best fit line is displayed in blue with a slope of -0.8 and a robust standard error of 0.9 
+          (p-value of 0.36). 95% confidence interval is denoted by gray shaded area. Results
+          are robust to weighting by state population.") +
+  theme(axis.title.x=element_text(size = 18),
+        title=element_text(size = 15),
+        plot.caption = element_text(hjust = 0),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 20))
+scatterplot
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_3.pdf", plot = scatterplot,dpi = 1200, width = 8, height = 6, units = "in")
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_3.png", plot = scatterplot,dpi = 1200, width = 8, height = 6, units = "in")
 
 #reg cases_per_million i.rm_disp if rm_disp == 1 | mm == 0, robust
 #reg cases_per_million i.rm_disp if rm_disp == 1 | mm == 1, robust
