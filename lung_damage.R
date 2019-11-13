@@ -6,6 +6,7 @@ library("cowplot")
 library("tidyverse")
 library("haven")
 library("estimatr")
+library("stargazer")
 
 # Import data
 marijuana_data <- read_dta("~/Documents/GitHub/evali_and_recreational_marijuana/data_for_R.dta")
@@ -53,10 +54,23 @@ summary(model_rm_prohib_ecig)
 # Difference between medical and prohibition
 model_mm_prohib_ecig <- lm_robust(ecigarette_use ~ mm, data = subset(marijuana_data, mm == 1 & rm_disp == 0 | mm == 0), se_type = "stata")
 summary(model_mm_prohib_ecig)
+
 # Count states by MJ policy
 count <- marijuana_data %>%
   group_by(mj_policy) %>%
   tally()
+
+# Main regression
+model_robust <- lm_robust(cases_per_million ~ ecigarette_use + mm + rm_disp, data = marijuana_data, se_type = "stata")
+summary(model_robust)
+
+model_mot_robust <- lm(cases_per_million ~ ecigarette_use + mm + rm_disp, data = marijuana_data)
+stargazer(model_mot_robust, 
+          se=starprep(model_mot_robust, se_type = "stata"),
+          covariate.labels=c("Prevalence of e-cigarette use (0-100%)",
+                             "Medical marijuana", 
+                             "Recreational dispensary open"),
+          column.labels=c(''))
 
 # Make a histogram of EVALI case rate
 hist <- ggplot(marijuana_data, aes(x = cases_per_million)) +
@@ -271,6 +285,15 @@ combined_plot_ecig
 ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_2.pdf", plot = combined_plot_ecig,dpi = 1200, width = 6, height = 15, units = "in")
 ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_2.png", plot = combined_plot_ecig,dpi = 1200, width = 6, height = 15, units = "in")
 
+# Combine the two combined plots
+combine_both_plot <- plot_grid(combined_plot, combined_plot_ecig, 
+                               ncol = 2, 
+                               labels = c('A', 'B'),
+                               rel_heights = c(1,1))
+combine_both_plot
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/main_exhibit.pdf", plot = combine_both_plot,dpi = 1200, width = 12, height = 15, units = "in")
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/main_exhibit.png", plot = combine_both_plot,dpi = 300, width = 12, height = 15, units = "in")
+
 
 #  EVALI case  rate v e-cigarette use
 model_evali_ecig <- lm_robust(cases_per_million ~ ecigarette_use, data = marijuana_data, se_type = "stata")
@@ -283,11 +306,17 @@ colnames(pred_df) <- gsub("fit.", "", colnames(pred_df))
 model_evali_ecig_weighted <- lm_robust(cases_per_million ~ ecigarette_use, data = marijuana_data, se_type = "stata", weights = population)
 summary(model_evali_ecig_weighted)
 
+#   geom_point(fill = "white", color = "white", size = 3) +
+
+library(ggrepel)
+
+#geom_text(aes(label = state),hjust= -.5, vjust=-.25, size = 3) +
+  
+
 # Scatter EVALI case  rate against e-cigarette use
 scatterplot <- ggplot(marijuana_data, aes(y = cases_per_million, x = ecigarette_use)) +
-  geom_point(fill = "white", color = "white", size = 3) +
+  geom_point(aes(fill=as.factor(mj_policy),shape=as.factor(mj_policy)), size=4) + 
   geom_smooth(method='lm_robust') +
-  geom_text(aes(label = state),hjust=0, vjust=0, size = 3) +
   theme_classic() +
   labs(y="EVALI cases per million population", 
        x = "Prevalence of e-cigarette use (0-100%)", 
@@ -300,10 +329,21 @@ scatterplot <- ggplot(marijuana_data, aes(y = cases_per_million, x = ecigarette_
         title=element_text(size = 15),
         plot.caption = element_text(hjust = 0),
         axis.text.x = element_text(size = 20),
-        axis.text.y = element_text(size = 20))
-scatterplot
-ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_3.pdf", plot = scatterplot,dpi = 1200, width = 8, height = 6, units = "in")
-ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_3.png", plot = scatterplot,dpi = 1200, width = 8, height = 6, units = "in")
+        axis.text.y = element_text(size = 20)) + 
+  scale_fill_manual(breaks = c("1", "2", "3"),
+                    values=cbPalette,
+                    name = "State marijuana policy",
+                    labels = c("Medicial", "Prohibition", "Recreational")) +
+  scale_shape_manual(breaks = c("1", "2", "3"),
+                     values=c(21,22,23),
+                     name = "State marijuana policy",
+                     labels = c("Medicial","Prohibition",  "Recreational")) +
+  theme(legend.position =  "none")
+
+p <- scatterplot +  geom_text_repel(data=marijuana_data, aes(label=state),  box.padding = 0.5)
+p
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_3.pdf", plot = p, dpi = 1200, width = 8, height = 6, units = "in")
+ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/exhibit_3.png", plot = p, dpi = 300, width = 8, height = 6, units = "in")
 
 #reg cases_per_million i.rm_disp if rm_disp == 1 | mm == 0, robust
 #reg cases_per_million i.rm_disp if rm_disp == 1 | mm == 1, robust
