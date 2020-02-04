@@ -1,94 +1,180 @@
+###################################################################
+# Replication code for Wing, Bradford, Carroll, Hollingsworth (2020)
+
+###################################################################
 # Clear memory
 rm(list=ls())
 
-# Load libraries
-library("cowplot")
-library("tidyverse")
-library("haven")
-library("estimatr")
-library("stargazer")
+###################################################################
+# Load required packages using package manager (pacman)
 
-# Import data
+# First make sure that pacman is installed
+if (!require("pacman")) install.packages("pacman")
+
+# Second, load all the packages that we will use 
+pacman::p_load(cowplot, tidyverse, haven, estimatr, stargazer, tidylog, huxtable, flextable)
+
+###################################################################
+# Set display options for tidylog
+options("tidylog.display" = NULL)
+
+###################################################################
+# Import marijuana data
 marijuana_data <- read_dta("~/Documents/GitHub/evali_and_recreational_marijuana/data_for_R.dta")
 
-# Make a variable equal to 1 if non-marijuana, 2 if medical
+###################################################################
+# Recode marijuana policy variables
+
+# Make a variable equal to 2 if non-marijuana, 1 if medical
 marijuana_data <- marijuana_data %>%
     mutate(mj_policy = ifelse(marijuana_data$mm== 1, 1,2))
 
 # Make the variable equal to 3 if recreational marijuana
 marijuana_data$mj_policy <- ifelse(marijuana_data$rm_disp == 1, 3, marijuana_data$mj_policy)
 
-# Calculate group means of EVALI by MJ policy
-means <- marijuana_data %>%
-  group_by(mj_policy) %>%
-  summarise(
-    Avg = mean(cases_per_million)
-  )
+###################################################################
+# Calculate group means of EVALI case rate by MJ policy
+
+# Use regression  so we can easily calculate the 95% CI and compare groups using huxreg package
+evali_no_mj_mean <- lm_robust(cases_per_million ~ 1, data = subset(marijuana_data, mj_policy == 2), se_type = "stata")
+evali_mm_mean <- lm_robust(cases_per_million ~ 1, data = subset(marijuana_data, mj_policy == 1), se_type = "stata")
+evali_rm_mean <- lm_robust(cases_per_million ~ 1, data = subset(marijuana_data, mj_policy == 3), se_type = "stata")
+
+# Store results in table 
+TableOfMeans.EVALI <- huxreg("Prohibition" = evali_no_mj_mean,  "Medical Only" = evali_mm_mean, "Recreational" = evali_rm_mean,
+       align = "center",
+       number_format = "%.2f",
+       error_format = '({conf.low} to {conf.high})', 
+       statistics = c(N = "nobs"), 
+       stars = NULL, 
+       coefs = c("Mean" = "(Intercept)"), 
+       note = "Note: 95% confidence interval calculated using robust standard errors in parantheses." )
+
+# Add title
+caption(TableOfMeans.EVALI) <- "Table 1: Mean EVALI case rate per million by marijuana policy"
+
+# Display table
+TableOfMeans.EVALI
+
+# Export table to word document
+TableOfMeansForWord.EVALI <- as_FlexTable(TableOfMeans.EVALI)
+TableOfMeansForWord.EVALI <-  fontsize(TableOfMeansForWord.EVALI, size = 12)
+TableOfMeansForWord.EVALI <- width(TableOfMeansForWord.EVALI, width = 1.25)
+my_doc <- officer::read_docx()
+my_doc <- flextable::body_add_flextable(
+  my_doc, TableOfMeansForWord.EVALI)
+print(my_doc, target =
+        "/Users/hollina/Documents/GitHub/evali_and_recreational_marijuana/evali_means.docx")
+
+###################################################################
+# Calculate difference between group means of EVALI case rate by MJ policy
 
 # Difference between Rec and Medical
-model_rm_mm <- lm_robust(cases_per_million ~ rm_disp, data = subset(marijuana_data, mm == 1), se_type = "stata")
-summary(model_rm_mm)
+compare_rm_mm <- lm_robust(cases_per_million ~ rm_disp, data = subset(marijuana_data, mm == 1), se_type = "stata")
 
 # Difference between Rec and prohibition
-model_rm_prohib <- lm_robust(cases_per_million ~ rm_disp, data = subset(marijuana_data, mm == 0 | rm_disp ==1), se_type = "stata")
-summary(model_rm_prohib)
+compare_rm_prohib <- lm_robust(cases_per_million ~ rm_disp, data = subset(marijuana_data, mm == 0 | rm_disp ==1), se_type = "stata")
 
 # Difference between medical and prohibition
-model_mm_prohib <- lm_robust(cases_per_million ~ mm, data = subset(marijuana_data, mm == 1 & rm_disp == 0 | mm == 0), se_type = "stata")
-summary(model_mm_prohib)
+compare_mm_prohib <- lm_robust(cases_per_million ~ mm, data = subset(marijuana_data, mm == 1 & rm_disp == 0 | mm == 0), se_type = "stata")
 
+
+TableOfDifferences.EVALI <- huxreg("Medical v\n Prohibition" = compare_mm_prohib,  "Prohibition v\n Recreational" = compare_rm_prohib, "Medical v\n Recreational" = compare_rm_mm,
+       align = "center",
+       number_format = "%.3f",
+       error_format = '({std.error}) \n [{p.value}] \n ({conf.low} to {conf.high})', 
+       statistics = c(N = "nobs"), 
+       coefs = c("Difference" = "mm", "Difference" = "rm_disp"), 
+       note = "Note: Difference between means of groups reported with the robust standard error of the difference reported in parantheses below. P-values reported in brackets. P-values also represented by stars with * p < 0.05, ** p < 0.01, *** p < 0.001. 95% confidence interval of difference in means calculated using robust standard errors in parantheses.")
+
+# Add title
+caption(TableOfDifferences.EVALI) <- "Table 2: Difference in mean EVALI case rate per million by marijuana policy"
+
+# Display table
+TableOfDifferences.EVALI
+
+# Export table to word document
+TableOfDifferencesForWord.EVALI <- as_FlexTable(TableOfDifferences.EVALI)
+TableOfDifferencesForWord.EVALI <-  fontsize(TableOfDifferencesForWord.EVALI, size = 12)
+TableOfDifferencesForWord.EVALI <- width(TableOfDifferencesForWord.EVALI, width = 1.25)
+my_doc <- officer::read_docx()
+my_doc <- flextable::body_add_flextable(
+  my_doc, TableOfDifferencesForWord.EVALI)
+print(my_doc, target =
+        "/Users/hollina/Documents/GitHub/evali_and_recreational_marijuana/evali_difference_in_means.docx")
+
+###################################################################
 # Calculate group means of e-cigarette use by MJ policy
-means_ecig <- marijuana_data %>%
-  group_by(mj_policy) %>%
-  summarise(
-    Avg = mean(ecigarette_use)
-  )
+
+# Use regression  so we can easily calculate the 95% CI and compare groups using huxreg package
+ecig_no_mj_mean <- lm_robust(ecigarette_use ~ 1, data = subset(marijuana_data, mj_policy == 2), se_type = "stata")
+ecig_mm_mean <- lm_robust(ecigarette_use ~ 1, data = subset(marijuana_data, mj_policy == 1), se_type = "stata")
+ecig_rm_mean <- lm_robust(ecigarette_use ~ 1, data = subset(marijuana_data, mj_policy == 3), se_type = "stata")
+
+# Store results in table 
+TableOfMeans.ecig <- huxreg("Prohibition" = ecig_no_mj_mean,  "Medical Only" = ecig_mm_mean, "Recreational" = ecig_rm_mean,
+                       align = "center",
+                       number_format = "%.2f",
+                       error_format = '({conf.low} to {conf.high})', 
+                       statistics = c(N = "nobs"), 
+                       stars = NULL, 
+                       coefs = c("Mean" = "(Intercept)"), 
+                       note = "Note: 95% confidence interval calculated using robust standard errors in parantheses.")
+# Add title
+caption(TableOfMeans.ecig) <- "Table 3: Mean e-cigarette use prevalence by marijuana policy"
+
+# Display table
+TableOfMeans.ecig
+
+# Export table to word document
+TableOfMeansForWord.ecig <- as_FlexTable(TableOfMeans.ecig)
+TableOfMeansForWord.ecig <-  fontsize(TableOfMeansForWord.ecig, size = 12)
+TableOfMeansForWord.ecig <- width(TableOfMeansForWord.ecig, width = 1.25)
+my_doc <- officer::read_docx()
+my_doc <- flextable::body_add_flextable(
+  my_doc, TableOfMeansForWord.ecig)
+print(my_doc, target =
+        "/Users/hollina/Documents/GitHub/evali_and_recreational_marijuana/ecigarette_use_means.docx")
+
+###################################################################
+# Calculate difference between group means of EVALI case rate by MJ policy
+
 # Difference between Rec and Medical
-model_rm_mm_ecig <- lm_robust(ecigarette_use ~ rm_disp, data = subset(marijuana_data, mm == 1), se_type = "stata")
-summary(model_rm_mm_ecig)
+ecig_compare_rm_mm <- lm_robust(ecigarette_use ~ rm_disp, data = subset(marijuana_data, mm == 1), se_type = "stata")
 
 # Difference between Rec and prohibition
-model_rm_prohib_ecig <- lm_robust(ecigarette_use ~ rm_disp, data = subset(marijuana_data, mm == 0 | rm_disp ==1), se_type = "stata")
-summary(model_rm_prohib_ecig)
+ecig_compare_rm_prohib <- lm_robust(ecigarette_use ~ rm_disp, data = subset(marijuana_data, mm == 0 | rm_disp ==1), se_type = "stata")
 
 # Difference between medical and prohibition
-model_mm_prohib_ecig <- lm_robust(ecigarette_use ~ mm, data = subset(marijuana_data, mm == 1 & rm_disp == 0 | mm == 0), se_type = "stata")
-summary(model_mm_prohib_ecig)
+ecig_compare_mm_prohib <- lm_robust(ecigarette_use ~ mm, data = subset(marijuana_data, mm == 1 & rm_disp == 0 | mm == 0), se_type = "stata")
 
-# Count states by MJ policy
-count <- marijuana_data %>%
-  group_by(mj_policy) %>%
-  tally()
 
-# Main regression
-model_robust <- lm_robust(cases_per_million ~ ecigarette_use + mm + rm_disp, data = marijuana_data, se_type = "stata")
-summary(model_robust)
+TableOfDifferences.ecig <- huxreg("Medical v\n Prohibition" = ecig_compare_mm_prohib,  "Prohibition v\n Recreational" = ecig_compare_rm_prohib, "Medical v\n Recreational" = ecig_compare_rm_mm,
+                             align = "center",
+                             number_format = "%.3f",
+                             error_format = '({std.error}) \n [{p.value}] \n ({conf.low} to {conf.high})', 
+                             statistics = c(N = "nobs"), 
+                             coefs = c("Difference" = "mm", "Difference" = "rm_disp"), 
+                             note = "Note: Difference between means of groups reported with the robust standard error of the difference reported in parantheses below. P-values reported in brackets. P-values also represented by stars with * p < 0.05, ** p < 0.01, *** p < 0.001. 95% confidence interval of difference in means calculated using robust standard errors in parantheses.")
 
-model_mot_robust <- lm(cases_per_million ~ ecigarette_use + mm + rm_disp, data = marijuana_data)
-stargazer(model_mot_robust, 
-          se=starprep(model_mot_robust, se_type = "stata"),
-          covariate.labels=c("Prevalence of e-cigarette use (0-100%)",
-                             "Medical marijuana", 
-                             "Recreational dispensary open"),
-          column.labels=c(''))
+# Add title
+caption(TableOfDifferences.ecig) <- "Table 4: Difference in mean e-cigarette use prevalence by marijuana policy"
 
-# Make a histogram of EVALI case rate
-hist <- ggplot(marijuana_data, aes(x = cases_per_million)) +
-  geom_histogram(fill = "white", color = "black") +
-  theme_classic() +
-  labs(x="Cases per million population", y = "Count", title = "Histogram of state EVALI case rate")
-hist 
-ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/histogram_evali.pdf", plot = hist,dpi = 1200, width = 6, height = 6, units = "in")
-ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/histogram_evali.png", plot = hist,dpi = 1200, width = 6, height = 6, units = "in")
+# Display table
+TableOfDifferences.ecig
 
-# Make a histogram of e-cigarette case rate
-hist_ecig <- ggplot(marijuana_data, aes(x = ecigarette_use)) +
-  geom_histogram(fill = "white", color = "black") +
-  theme_classic() +
-  labs(x="Cases per million population", y = "Count", title = "Histogram of e-cigarette prevalence")
-hist_ecig
-ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/histogram_ecigarette.pdf", plot = hist_ecig,dpi = 1200, width = 6, height = 6, units = "in")
-ggsave("~/Documents/GitHub/evali_and_recreational_marijuana/histogram_ecigarette.png", plot = hist_ecig,dpi = 1200, width = 6, height = 6, units = "in")
+# Export table to word document
+TableOfDifferencesForWord.ecig <- as_FlexTable(TableOfDifferences.ecig)
+TableOfDifferencesForWord.ecig <-  fontsize(TableOfDifferencesForWord.ecig, size = 12)
+TableOfDifferencesForWord.ecig <- width(TableOfDifferencesForWord.ecig, width = 1.25)
+my_doc <- officer::read_docx()
+my_doc <- flextable::body_add_flextable(
+  my_doc, TableOfDifferencesForWord.ecig)
+print(my_doc, target =
+        "/Users/hollina/Documents/GitHub/evali_and_recreational_marijuana/ecigarette_use_difference_in_means.docx")
+
+###################################################################
+# Plot data 
 
 # Make a custom color palette 
 cbPalette <- c("#3F3DCB", 
