@@ -12,7 +12,7 @@ rm(list=ls())
 if (!require("pacman")) install.packages("pacman")
 
 # Second, load all the packages that we will use 
-pacman::p_load(plyr, cowplot, tidyverse, haven, estimatr, tidylog, huxtable,
+pacman::p_load(plyr, cowplot, tidyverse, estimatr, tidylog, huxtable,
                flextable, ggrepel, mfx, openxlsx)
 
 ###################################################################
@@ -21,7 +21,7 @@ options("tidylog.display" = NULL)
 
 ###################################################################
 # Import marijuana data
-marijuana_data <- read_dta("data/data_for_R.dta")
+marijuana_data <- read_csv("data/data_for_analysis.csv")
 
 ###################################################################
 # Recode marijuana policy variables
@@ -641,55 +641,16 @@ dot_plot_with_bounds <- ggplot(marijuana_data, aes(x = cases_per_million, y = re
 
 dot_plot_with_bounds
 
-# From: https://rstudio-pubs-static.s3.amazonaws.com/52698_50ff69eef1524ec5a3f082a99da4c704.html
-summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
-                      conf.interval=.95, .drop=TRUE) {
-  require(plyr)
-  
-  # New version of length which can handle NA's: if na.rm==T, don't count them
-  length2 <- function (x, na.rm=FALSE) {
-    if (na.rm) sum(!is.na(x))
-    else       length(x)
-  }
-  
-  # This does the summary. For each group's data frame, return a vector with
-  # N, mean, and sd
-  datac <- ddply(data, groupvars, .drop=.drop,
-                 .fun = function(xx, col) {
-                   c(N    = length2(xx[[col]], na.rm=na.rm),
-                     mean = mean   (xx[[col]], na.rm=na.rm),
-                     sd   = sd     (xx[[col]], na.rm=na.rm)
-                   )
-                 },
-                 measurevar
-  )
-  
-  # Rename the "mean" column    
-  datac <- rename(datac, c("mean" = measurevar))
-  
-  datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
-  
-  # Confidence interval multiplier for standard error
-  # Calculate t-statistic for confidence interval: 
-  # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
-  ciMult <- qt(conf.interval/2 + .5, datac$N-1)
-  datac$ci <- datac$se * ciMult
-  
-  return(datac)
-}
-
-dt <- summarySE(data = marijuana_data, measurevar = "cases_per_million", groupvars = c("mj_policy"))
-
 
 # Make a bar plot of mean EVALI case rate by state MJ policy
-bar_plot_with_ci <- ggplot(dt, aes(x = as.factor(mj_policy), y = cases_per_million, fill=as.factor(mj_policy),color=as.factor(mj_policy))) + 
+bar_plot_with_ci <- ggplot(mean_evali_by_mj_use, aes(x = as.factor(mj_policy), y = mean, fill=as.factor(mj_policy),color=as.factor(mj_policy))) + 
   theme_bw() + 
   geom_bar(stat="identity", position = position_dodge()) + # adding bar plo
-  geom_errorbar(aes(ymin = cases_per_million - se, ymax = cases_per_million + se),  
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci),  
                 width=.1, size = 1,                  # Width of the error bars
                 position=position_dodge(.9), color = "white") + 
-  geom_errorbar(aes(ymin = cases_per_million - se, ymax = cases_per_million + se),  
-    width=.1,       size = .5,                # Width of the error bars
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci),  
+                width=.1,       size = .5,                # Width of the error bars
     position=position_dodge(.9), color = "black") +
   coord_flip() +
   theme_classic() + 
@@ -769,17 +730,15 @@ ggsave("output/exhibit_1a_with_bars.pdf", plot = combined_plot_with_bars,dpi = 1
 ggsave("output/exhibit_1a_with_bars.png", plot = combined_plot_with_bars,dpi = 1200, width = 6, height = 15, units = "in")
 
 
-dt_ecig <- summarySE(data = marijuana_data, measurevar = "ecigarette_use", groupvars = c("mj_policy"))
-
 
 # Make a bar plot of mean EVALI case rate by state MJ policy
-bar_plot_ecig_with_ci <- ggplot(dt_ecig, aes(x = as.factor(mj_policy), y = ecigarette_use, fill=as.factor(mj_policy),color=as.factor(mj_policy))) + 
+bar_plot_ecig_with_ci <- ggplot(mean_ecig_by_mj_use, aes(x = as.factor(mj_policy), y = mean, fill=as.factor(mj_policy),color=as.factor(mj_policy))) + 
   theme_bw() + 
   geom_bar(stat="identity", position = position_dodge()) + # adding bar plo
-  geom_errorbar(aes(ymin = ecigarette_use - se, ymax = ecigarette_use + se),  
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci),  
                 width=.1, size = 1,                  # Width of the error bars
                 position=position_dodge(.9), color = "white") + 
-  geom_errorbar(aes(ymin = ecigarette_use - se, ymax = ecigarette_use + se),  
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci),  
                 width=.1,       size = .5,                # Width of the error bars
                 position=position_dodge(.9), color = "black") +
   coord_flip() +
