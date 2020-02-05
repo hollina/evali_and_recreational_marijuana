@@ -1,7 +1,7 @@
 global root_path "~/Documents/GitHub/evali_and_recreational_marijuana"
 
 
-import excel "$root_path/cdc_data.xlsx", sheet("Sheet1") clear
+import excel "$root_path/data/cdc_data.xlsx", sheet("Sheet1") clear
 gen number = _n
 gen odd = mod(number,2)
 gen id = _n
@@ -164,9 +164,15 @@ save "/Users/hollinal/Desktop/lung_damage/data_for_R.dta", replace
  import excel "/Users/hollina/Documents/GitHub/evali_and_recreational_marijuana/ecigarette_use_2017.xlsx", sheet("Sheet1") firstrow clear
  merge 1:1 state using  "$root_path/data_for_R.dta", 
 keep if _merge == 3
+
+drop population 
+drop _merge
+drop race origin sex age
+drop year
+drop CountyFIPS 
 compress 
 save "$root_path/data_for_R.dta", replace
-
+export delimited using "/Users/hollina/Documents/GitHub/evali_and_recreational_marijuana/data/data_for_analysis.csv", replace
 /*
 sumup cases_per_100k [aw = pop_total], by(rm_disp)
 sumup cases_per_100k [aw = pop_total], by(rm)
