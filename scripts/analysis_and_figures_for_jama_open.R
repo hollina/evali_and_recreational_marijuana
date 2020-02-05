@@ -119,67 +119,67 @@ print(my_doc, target =
 # Control for both at the same time (have to put results in a data frame then export as a huxtable since there is no clear way to link mfx for poisson to table)
 
 # Initialize table
-common_results_table <- data.frame(matrix(ncol = 2, nrow = 16 ))
+common_results_table <- data.frame(matrix(ncol = 1, nrow = 16 ))
 names(common_results_table) <- c("OLS", "Poisson (mfx)")
 
 
 # Using OLS
-compare_all_ols <- lm_robust(cases_per_million ~ I(mm == 1 & rm == 0) +  I(rm == 1) , data = marijuana_data, se_type = "stata")
-
-
-sym <-""
-  if (is.na(compare_all_ols$p.value[1])==FALSE){
-    if (compare_all_ols$p.value[1]<=.05) {
-      sym <- "*"
-    } 
-    if (compare_all_ols$p.value[1]<=.01) {
-      sym <- "**"
-    } 
-    if (compare_all_ols$p.value[1]<=.001) {
-      sym <- "***"
-    }
-  }
-common_results_table[1,1] <- paste0(round(compare_all_ols$coefficients[1],digits = 2), sym)
-common_results_table[2,1] <- paste0("(",round(compare_all_ols$std.error[1],digits = 2),")")
-common_results_table[3,1] <- paste0("[",round(compare_all_ols$p.value[1],digits = 2),"]")
-common_results_table[4,1] <- paste0("(",round(compare_all_ols$conf.low[1],digits = 2)," to ",round(compare_all_ols$conf.high[1],digits = 2),")")
-
-
-sym <-""
-if (is.na(compare_all_ols$p.value[2])==FALSE){
-  if (compare_all_ols$p.value[2]<=.05) {
-    sym <- "*"
-  } 
-  if (compare_all_ols$p.value[2]<=.01) {
-    sym <- "**"
-  } 
-  if (compare_all_ols$p.value[2]<=.001) {
-    sym <- "***"
-  }
-}
-common_results_table[6,1] <- paste0(round(compare_all_ols$coefficients[2],digits = 2), sym)
-common_results_table[7,1] <- paste0("(",round(compare_all_ols$std.error[2],digits = 2),")")
-common_results_table[8,1] <- paste0("[",round(compare_all_ols$p.value[2],digits = 2),"]")
-common_results_table[9,1] <- paste0("(",round(compare_all_ols$conf.low[2],digits = 2)," to ",round(compare_all_ols$conf.high[2],digits = 2),")")
-
-sym <-""
-if (is.na(compare_all_ols$p.value[3])==FALSE){
-  if (compare_all_ols$p.value[3]<=.05) {
-    sym <- "*"
-  } 
-  if (compare_all_ols$p.value[3]<=.01) {
-    sym <- "**"
-  } 
-  if (compare_all_ols$p.value[3]<=.001) {
-    sym <- "***"
-  }
-}
-common_results_table[11,1] <- paste0(round(compare_all_ols$coefficients[3],digits = 2), sym)
-common_results_table[12,1] <- paste0("(",round(compare_all_ols$std.error[3],digits = 2),")")
-common_results_table[13,1] <- paste0("[",round(compare_all_ols$p.value[3],digits = 2),"]")
-common_results_table[14,1] <- paste0("(",round(compare_all_ols$conf.low[3],digits = 2)," to ",round(compare_all_ols$conf.high[3],digits = 3),")")
-
-common_results_table[16,1] <- nrow(marijuana_data)
+# compare_all_ols <- lm_robust(cases_per_million ~ I(mm == 1 & rm == 0) +  I(rm == 1) , data = marijuana_data, se_type = "stata")
+# 
+# 
+# sym <-""
+#   if (is.na(compare_all_ols$p.value[1])==FALSE){
+#     if (compare_all_ols$p.value[1]<=.05) {
+#       sym <- "*"
+#     } 
+#     if (compare_all_ols$p.value[1]<=.01) {
+#       sym <- "**"
+#     } 
+#     if (compare_all_ols$p.value[1]<=.001) {
+#       sym <- "***"
+#     }
+#   }
+# common_results_table[1,1] <- paste0(round(compare_all_ols$coefficients[1],digits = 2), sym)
+# common_results_table[2,1] <- paste0("(",round(compare_all_ols$std.error[1],digits = 2),")")
+# common_results_table[3,1] <- paste0("[",round(compare_all_ols$p.value[1],digits = 2),"]")
+# common_results_table[4,1] <- paste0("(",round(compare_all_ols$conf.low[1],digits = 2)," to ",round(compare_all_ols$conf.high[1],digits = 2),")")
+# 
+# 
+# sym <-""
+# if (is.na(compare_all_ols$p.value[2])==FALSE){
+#   if (compare_all_ols$p.value[2]<=.05) {
+#     sym <- "*"
+#   } 
+#   if (compare_all_ols$p.value[2]<=.01) {
+#     sym <- "**"
+#   } 
+#   if (compare_all_ols$p.value[2]<=.001) {
+#     sym <- "***"
+#   }
+# }
+# common_results_table[6,1] <- paste0(round(compare_all_ols$coefficients[2],digits = 2), sym)
+# common_results_table[7,1] <- paste0("(",round(compare_all_ols$std.error[2],digits = 2),")")
+# common_results_table[8,1] <- paste0("[",round(compare_all_ols$p.value[2],digits = 2),"]")
+# common_results_table[9,1] <- paste0("(",round(compare_all_ols$conf.low[2],digits = 2)," to ",round(compare_all_ols$conf.high[2],digits = 2),")")
+# 
+# sym <-""
+# if (is.na(compare_all_ols$p.value[3])==FALSE){
+#   if (compare_all_ols$p.value[3]<=.05) {
+#     sym <- "*"
+#   } 
+#   if (compare_all_ols$p.value[3]<=.01) {
+#     sym <- "**"
+#   } 
+#   if (compare_all_ols$p.value[3]<=.001) {
+#     sym <- "***"
+#   }
+# }
+# common_results_table[11,1] <- paste0(round(compare_all_ols$coefficients[3],digits = 2), sym)
+# common_results_table[12,1] <- paste0("(",round(compare_all_ols$std.error[3],digits = 2),")")
+# common_results_table[13,1] <- paste0("[",round(compare_all_ols$p.value[3],digits = 2),"]")
+# common_results_table[14,1] <- paste0("(",round(compare_all_ols$conf.low[3],digits = 2)," to ",round(compare_all_ols$conf.high[3],digits = 3),")")
+# 
+# common_results_table[16,1] <- nrow(marijuana_data)
 
 # Using Poisson count model
 compare_all_poisson <-poissonmfx(round(mid_point) ~  I(mm == 1 & rm == 0) + I(rm == 1) + offset(log(pop_total/1000000)), data = marijuana_data)
@@ -198,10 +198,10 @@ if (is.na(compare_all_poisson$mfxest[1,4])==FALSE){
     sym <- "***"
   }
 }
-common_results_table[6,2] <- paste0(round(compare_all_poisson$mfxest[1,1],digits = 2), sym)
-common_results_table[7,2] <- paste0("(",round(compare_all_poisson$mfxest[1,2],digits = 2),")")
-common_results_table[8,2] <- paste0("[",round(compare_all_poisson$mfxest[1,4],digits = 2),"]")
-common_results_table[9,2] <- paste0("(",
+common_results_table[6,1] <- paste0(round(compare_all_poisson$mfxest[1,1],digits = 2), sym)
+common_results_table[7,1] <- paste0("(",round(compare_all_poisson$mfxest[1,2],digits = 2),")")
+common_results_table[8,1] <- paste0("[",round(compare_all_poisson$mfxest[1,4],digits = 2),"]")
+common_results_table[9,1] <- paste0("(",
                                     round(compare_all_poisson$mfxest[1,1] - qt(0.975, compare_all_poisson[["fit"]][["df.residual"]] -1)*compare_all_poisson$mfxest[1,2],digits = 2),
                                     " to ",
                                     round(compare_all_poisson$mfxest[1,1] + qt(0.975, compare_all_poisson[["fit"]][["df.residual"]] -1)*compare_all_poisson$mfxest[1,2],digits = 2),
@@ -219,22 +219,22 @@ if (is.na(compare_all_poisson$mfxest[2,4])==FALSE){
     sym <- "***"
   }
 }
-common_results_table[11,2] <- paste0(round(compare_all_poisson$mfxest[2,1],digits = 2), sym)
-common_results_table[12,2] <- paste0("(",round(compare_all_poisson$mfxest[2,2],digits = 2),")")
-common_results_table[13,2] <- paste0("[",round(compare_all_poisson$mfxest[2,4],digits = 2),"]")
-common_results_table[14,2] <- paste0("(",
+common_results_table[11,1] <- paste0(round(compare_all_poisson$mfxest[2,1],digits = 2), sym)
+common_results_table[12,1] <- paste0("(",round(compare_all_poisson$mfxest[2,2],digits = 2),")")
+common_results_table[13,1] <- paste0("[",round(compare_all_poisson$mfxest[2,4],digits = 2),"]")
+common_results_table[14,1] <- paste0("(",
                                     round(compare_all_poisson$mfxest[2,1] - qt(0.975, compare_all_poisson[["fit"]][["df.residual"]] -1)*compare_all_poisson$mfxest[2,2],digits = 2),
                                     " to ",
                                     round(compare_all_poisson$mfxest[2,1] + qt(0.975, compare_all_poisson[["fit"]][["df.residual"]] -1)*compare_all_poisson$mfxest[2,2],digits = 2),
                                     ")")
 
-common_results_table[16,2] <- nrow(marijuana_data)
+common_results_table[16,1] <- nrow(marijuana_data)
 
 hux_common_results_table <- as_hux(common_results_table, add_colnames = TRUE)
 
 
 hux_common_results_table <- insert_row(hux_common_results_table,
-                      c("(1)", "(2)"),
+                      c("(1)"),
                       after = 0
 )
 
@@ -250,11 +250,11 @@ hux_common_results_table <- insert_column(hux_common_results_table,
 
 
 hux_common_results_table <- hux_common_results_table %>%
-  set_top_border(1, 1:3, 1)     %>%
-  set_bottom_border(2, 2:3, 1)     %>%
-  set_top_border(18, 2:3, 1)     %>%
-  set_bottom_border(18, 1:3, 1)   %>%
-  set_align(1:18, 2:3, "center")  
+  set_top_border(1, 1:2, 1)     %>%
+  set_bottom_border(2, 2, 1)     %>%
+  set_top_border(18, 2, 1)     %>%
+  set_bottom_border(18, 1:2, 1)   %>%
+  set_align(1:18, 2, "center")  
 
 # Add title
 caption(hux_common_results_table) <- "Table 5: The association between the EVALI case rate per million and marijuana policy while controling for both medical and recreational"
@@ -839,14 +839,22 @@ model_evali_ecig <- lm_robust(cases_per_million ~ ecigarette_use, data = marijua
 #  EVALI case  rate v e-cigarette use. Weighted by population.
 model_evali_ecig_weighted <- lm_robust(cases_per_million ~ ecigarette_use, data = marijuana_data, se_type = "stata", weights = pop_total)
 
+
+#  EVALI case  rate v e-cigarette use; controlling for MJ policy 
+model_evali_mj_policies <- lm_robust(cases_per_million ~  I(rm == 1) + I(mm == 1 & rm == 0), data = marijuana_data, se_type = "stata")
+
+#  EVALI case  rate v e-cigarette use; controlling for MJ policy. Weighted by population. 
+model_evali_mj_policies_weighted <- lm_robust(cases_per_million ~  I(rm == 1) + I(mm == 1 & rm == 0), data = marijuana_data, se_type = "stata", weights = pop_total)
+
+
 #  EVALI case  rate v e-cigarette use; controlling for MJ policy 
 model_evali_ecig_and_mj_policies <- lm_robust(cases_per_million ~ ecigarette_use + I(rm == 1) + I(mm == 1 & rm == 0), data = marijuana_data, se_type = "stata")
 
 #  EVALI case  rate v e-cigarette use; controlling for MJ policy. Weighted by population. 
 model_evali_ecig_and_mj_policies_weighted <- lm_robust(cases_per_million ~ ecigarette_use + I(rm == 1) + I(mm == 1 & rm == 0), data = marijuana_data, se_type = "stata", weights = pop_total)
-huxreg(model_evali_ecig_and_mj_policies_weighted)
 
-Table.EVALIvEcig <- huxreg( model_evali_ecig, model_evali_ecig_and_mj_policies,
+
+Table.EVALIvEcig <- huxreg( model_evali_ecig, model_evali_mj_policies, model_evali_ecig_and_mj_policies,
                                   align = "center",
                                   number_format = "%.3f",
                                   error_format = '({std.error}) \n [{p.value}] \n ({conf.low} to {conf.high})', 
