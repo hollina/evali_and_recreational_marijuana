@@ -267,7 +267,8 @@ hux_common_results_table
 wb <- as_Workbook(hux_common_results_table)
 
 openxlsx::saveWorkbook(wb,
-                       "output/evali_common_regression.xlsx")
+                       "output/evali_common_regression.xlsx", 
+                        overwrite = TRUE)
 
 
 
@@ -669,53 +670,50 @@ bar_plot_with_ci <- ggplot(mean_evali_by_mj_use, aes(x = as.factor(mj_policy), y
                                                                     filter(mj_policy == 2) %>%
                                                                       dplyr::select(c(n)),
                                                                   digits = 3),1),")"), 
-                              paste0("Recreational\n (N = ",nth(round(mean_evali_by_mj_use %>% 
+                              paste0("  Recreational\n (N = ",nth(round(mean_evali_by_mj_use %>% 
                                                                     filter(mj_policy == 3) %>%
                                                                       dplyr::select(c(n)),
                                                                   digits = 3),1),")"))) +
-  annotate("text", label = "    6.4**", x = 2.55, y = 14.5, color = "black", size = 5) +
+  annotate("text", label = "    6.4**", x = 2.55, y = 16, color = "black", size = 5) +
   geom_segment(x = 3, xend = 2.1, 
-               y = 12.5, yend = 12.5,
+               y = 14, yend = 14,
                colour = "black") +
   geom_segment(x = 3, xend = 3, 
-               y = 11.5, yend =12.5 ,
+               y = 13, yend =14 ,
                colour = "black") +
   geom_segment(x = 2.1, xend = 2.1, 
-               y = 11.5, yend = 12.5,
+               y = 13, yend = 14,
                colour = "black") +
-  annotate("text", label = "  0.7", x = 1.5, y = 14.5, color = "black", size = 5) +
+  annotate("text", label = "  0.7", x = 1.5, y = 16, color = "black", size = 5) +
   geom_segment(x = 1, xend = 1.9, 
-               y = 12.5, yend = 12.5,
+               y = 14, yend = 14,
                colour = "black") +
   geom_segment(x = 1, xend = 1, 
-               y = 11.5, yend =12.5 ,
+               y = 13, yend =14 ,
                colour = "black") +
   geom_segment(x = 1.9, xend = 1.9, 
-               y = 11.5, yend = 12.5,
+               y = 13, yend = 14,
                colour = "black")  +
-  annotate("text", label = "      8.8 - 1.7 = 7.1***", x = 2, y = 30, color = "black", size = 5) +
+  annotate("text", label = "      8.8 - 1.7 = 7.1***", x = 2, y = 31.5, color = "black", size = 5) +
   geom_segment(x = 1, xend = 3, 
-               y = 21, yend = 21,
+               y = 22.5, yend = 22.5,
                colour = "black") +
   geom_segment(x = 1, xend = 1, 
-               y = 20, yend =21 ,
+               y = 21.5, yend =22.5 ,
                colour = "black") +
   geom_segment(x = 3, xend = 3, 
-               y = 20, yend = 21,
+               y = 21.5, yend = 22.5,
                colour = "black")  +
   theme(axis.text.x = element_text(size = 20),
         axis.text.y = element_text(size = 12, angle = 90, hjust = .5)) +
   labs(title="Average case rate by state marijuana policy",
        caption=
-         "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state
-       to be a recreational marijuana state if it had at least one 
-       recreational dispensary open in January 2019. Results
-       are robust to considering any state with an effective
-       recreational marijuana law as of 2019 (AK, CA, CO, DC,
-       ME, MA, MI, NV, OR, VT, WA) to be a recreational state.
-       Bars in top panel reflect range of EVALI cases per million. 
-       Brackets in the bottom panel display 95% confidence interval
-       of each group mean.") +
+         "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state to be a
+       recreational marijuana state if it had at least one rec dispensary
+       open in January 2019. Results are robust to considering any state 
+       with a rec marijuana law as of 2019 to be a rec state. Bars in
+       top panel reflect range of EVALI cases per million. Brackets in the
+       bottom panel display 95% confidence interval of each group mean.") +
   theme(axis.title.x=element_text(size = 18),
         title=element_text(size = 15),
         plot.caption = element_text(hjust = 0))
@@ -758,7 +756,7 @@ bar_plot_ecig_with_ci <- ggplot(mean_ecig_by_mj_use, aes(x = as.factor(mj_policy
                                                                        filter(mj_policy == 2) %>%
                                                                        dplyr::select(c(n)),
                                                                      digits = 3),1),")"), 
-                              paste0("Recreational\n (N = ",nth(round(mean_evali_by_mj_use %>% 
+                              paste0("  Recreational\n (N = ",nth(round(mean_evali_by_mj_use %>% 
                                                                         filter(mj_policy == 3) %>%
                                                                         dplyr::select(c(n)),
                                                                       digits = 3),1),")"))) +
@@ -796,15 +794,12 @@ bar_plot_ecig_with_ci <- ggplot(mean_ecig_by_mj_use, aes(x = as.factor(mj_policy
         axis.text.y = element_text(size = 12, angle = 90, hjust = .5)) +
   labs(title="Average e-cig use by state marijuana policy",
        caption=
-         "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state
-       to be a recreational marijuana state if it had at least one 
-       recreational dispensary open in January 2019. Results
-       are robust to considering any state with an effective
-       recreational marijuana law as of 2019 (AK, CA, CO, DC,
-       ME, MA, MI, NV, OR, VT, WA) to be a recreational state.
-       Brackets in the bottom panel display 95% confidence interval
-       of each group mean.
-       ") +
+         "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state to be a
+       recreational marijuana state if it had at least one rec dispensary
+       open in January 2019. Results are robust to considering any state 
+       with a rec marijuana law as of 2019 to be a rec state. Brackets
+       in the bottom panel display 95% confidence interval of each
+       group mean.") +
   theme(axis.title.x=element_text(size = 18),
         title=element_text(size = 15),
         plot.caption = element_text(hjust = 0))
