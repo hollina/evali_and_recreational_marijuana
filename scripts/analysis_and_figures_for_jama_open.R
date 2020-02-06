@@ -60,7 +60,7 @@ TableOfMeans.EVALI <- huxreg("Prohibition" = evali_no_mj_mean,  "Medical Only" =
        statistics = c(N = "nobs"), 
        stars = NULL, 
        coefs = c("Mean" = "(Intercept)"), 
-       note = "Note: 95% confidence interval calculated using robust standard errors in parantheses." )
+       note = "Note: 95% confidence interval calculated using robust standard errors in parentheses." )
 
 # Add title
 caption(TableOfMeans.EVALI) <- "Table 1: Mean EVALI case rate per million by marijuana policy"
@@ -97,7 +97,7 @@ TableOfDifferences.EVALI <- huxreg("Medical v\n Prohibition" = compare_mm_prohib
        error_format = '({std.error}) \n [{p.value}] \n ({conf.low} to {conf.high})', 
        statistics = c(N = "nobs"), 
        coefs = c("Difference" = "mm", "Difference" = "rm_disp"), 
-       note = "Note: Difference between means of groups reported with the robust standard error of the difference reported in parantheses below. P-values reported in brackets. P-values also represented by stars with * p < 0.05, ** p < 0.01, *** p < 0.001. 95% confidence interval of difference in means calculated using robust standard errors in parantheses.")
+       note = "Note: Difference between means of groups reported with the robust standard error of the difference reported in parentheses below. P-values reported in brackets. P-values also represented by stars with * p < 0.05, ** p < 0.01, *** p < 0.001. 95% confidence interval of difference in means calculated using robust standard errors in parentheses.")
 
 # Add title
 caption(TableOfDifferences.EVALI) <- "Table 2: Difference in mean EVALI case rate per million by marijuana policy"
@@ -124,7 +124,7 @@ names(common_results_table) <- c("OLS", "Poisson (mfx)")
 
 
 # Using OLS
-# compare_all_ols <- lm_robust(cases_per_million ~ I(mm == 1 & rm == 0) +  I(rm == 1) , data = marijuana_data, se_type = "stata")
+# compare_all_ols <- lm_robust(cases_per_million ~ I(mm == 1 & rm_disp == 0) +  I(rm_disp == 1) , data = marijuana_data, se_type = "stata")
 # 
 # 
 # sym <-""
@@ -182,7 +182,7 @@ names(common_results_table) <- c("OLS", "Poisson (mfx)")
 # common_results_table[16,1] <- nrow(marijuana_data)
 
 # Using Poisson count model
-compare_all_poisson <-poissonmfx(round(mid_point) ~  I(mm == 1 & rm == 0) + I(rm == 1) + offset(log(pop_total/1000000)), data = marijuana_data)
+compare_all_poisson <-poissonmfx(round(mid_point) ~  I(mm == 1 & rm_disp == 0) + I(rm_disp == 1) + offset(log(pop_total/1000000)), data = marijuana_data)
 # Recreational marijuana adoption is associated with -3.05 per million (roughly 40% of mean) 
 
 
@@ -302,7 +302,7 @@ TableOfMeans.ecig <- huxreg("Prohibition" = ecig_no_mj_mean,  "Medical Only" = e
                        statistics = c(N = "nobs"), 
                        stars = NULL, 
                        coefs = c("Mean" = "(Intercept)"), 
-                       note = "Note: 95% confidence interval calculated using robust standard errors in parantheses.")
+                       note = "Note: 95% confidence interval calculated using robust standard errors in parentheses.")
 # Add title
 caption(TableOfMeans.ecig) <- "Table 3: Mean e-cigarette use prevalence by marijuana policy"
 
@@ -338,7 +338,7 @@ TableOfDifferences.ecig <- huxreg("Medical v\n Prohibition" = ecig_compare_mm_pr
                              error_format = '({std.error}) \n [{p.value}] \n ({conf.low} to {conf.high})', 
                              statistics = c(N = "nobs"), 
                              coefs = c("Difference" = "mm", "Difference" = "rm_disp"), 
-                             note = "Note: Difference between means of groups reported with the robust standard error of the difference reported in parantheses below. P-values reported in brackets. P-values also represented by stars with * p < 0.05, ** p < 0.01, *** p < 0.001. 95% confidence interval of difference in means calculated using robust standard errors in parantheses.")
+                             note = "Note: Difference between means of groups reported with the robust standard error of the difference reported in parentheses below. P-values reported in brackets. P-values also represented by stars with * p < 0.05, ** p < 0.01, *** p < 0.001. 95% confidence interval of difference in means calculated using robust standard errors in parentheses.")
 
 # Add title
 caption(TableOfDifferences.ecig) <- "Table 4: Difference in mean e-cigarette use prevalence by marijuana policy"
@@ -841,29 +841,29 @@ model_evali_ecig_weighted <- lm_robust(cases_per_million ~ ecigarette_use, data 
 
 
 #  EVALI case  rate v e-cigarette use; controlling for MJ policy 
-model_evali_mj_policies <- lm_robust(cases_per_million ~  I(rm == 1) + I(mm == 1 & rm == 0), data = marijuana_data, se_type = "stata")
+model_evali_mj_policies <- lm_robust(cases_per_million ~  I(rm_disp == 1) + I(mm == 1 & rm_disp == 0), data = marijuana_data, se_type = "stata")
 
 #  EVALI case  rate v e-cigarette use; controlling for MJ policy. Weighted by population. 
-model_evali_mj_policies_weighted <- lm_robust(cases_per_million ~  I(rm == 1) + I(mm == 1 & rm == 0), data = marijuana_data, se_type = "stata", weights = pop_total)
+model_evali_mj_policies_weighted <- lm_robust(cases_per_million ~  I(rm_disp == 1) + I(mm == 1 & rm_disp == 0), data = marijuana_data, se_type = "stata", weights = pop_total)
 
 
 #  EVALI case  rate v e-cigarette use; controlling for MJ policy 
-model_evali_ecig_and_mj_policies <- lm_robust(cases_per_million ~ ecigarette_use + I(rm == 1) + I(mm == 1 & rm == 0), data = marijuana_data, se_type = "stata")
+model_evali_ecig_and_mj_policies <- lm_robust(cases_per_million ~ ecigarette_use + I(rm_disp == 1) + I(mm == 1 & rm_disp == 0), data = marijuana_data, se_type = "stata")
 
 #  EVALI case  rate v e-cigarette use; controlling for MJ policy. Weighted by population. 
-model_evali_ecig_and_mj_policies_weighted <- lm_robust(cases_per_million ~ ecigarette_use + I(rm == 1) + I(mm == 1 & rm == 0), data = marijuana_data, se_type = "stata", weights = pop_total)
+model_evali_ecig_and_mj_policies_weighted <- lm_robust(cases_per_million ~ ecigarette_use + I(rm_disp == 1) + I(mm == 1 & rm_disp == 0), data = marijuana_data, se_type = "stata", weights = pop_total)
 
 
-Table.EVALIvEcig <- huxreg( model_evali_ecig, model_evali_mj_policies, model_evali_ecig_and_mj_policies,
+Table.EVALIvEcig <- huxreg(model_evali_mj_policies, model_evali_ecig, model_evali_ecig_and_mj_policies,
                                   align = "center",
                                   number_format = "%.3f",
                                   error_format = '({std.error}) \n [{p.value}] \n ({conf.low} to {conf.high})', 
                                   statistics = c(N = "nobs"), 
                                   coefs = c("Intercept" = "(Intercept)", 
                                             "E-cigarette use (0-100%)" = "ecigarette_use", 
-                                            "Medical marijuana only" = "I(mm == 1 & rm == 0)TRUE", 
-                                            "Recreational marijuana" = "I(rm == 1)TRUE"), 
-                                  note = "Note: Robust standard error reported in parantheses below. P-values reported in brackets. P-values also represented by stars with * p < 0.05, ** p < 0.01, *** p < 0.001. 95% confidence interval calculated using robust standard errors in parantheses.")
+                                            "Medical marijuana only" = "I(mm == 1 & rm_disp == 0)TRUE", 
+                                            "Recreational marijuana" = "I(rm_disp == 1)TRUE"), 
+                                  note = "Note: Robust standard error reported in parentheses below. P-values reported in brackets. P-values also represented by stars with * p < 0.05, ** p < 0.01, *** p < 0.001. 95% confidence interval calculated using robust standard errors in parentheses.")
 
 # Add title
 caption(Table.EVALIvEcig) <- "Table 5: The association of lower EVALI case rates and recreational marijuana is robust to controlling for prevalence of e-cigarette use and
