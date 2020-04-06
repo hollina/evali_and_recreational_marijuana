@@ -6,12 +6,12 @@ Wing, Coady. Ashley Bradford, Aaron Carroll, and Alex Hollingsworth. (2020) "Ass
 
 
 <figure style="float:center;">
-<img src="https://github.com/hollina/evali_and_recreational_marijuana/blob/master/output/main_exhibit_with_bars.png"  width="300"  /> 
+<img src="https://github.com/hollina/evali_and_recreational_marijuana/blob/master/output/main_exhibit_with_bars.png"  width="600"  /> 
 </figure>
 
 
 
-**Abstract**: In the last decade, health care reform has dominated U.S. public policy and political discourse. Double-digit rate increases in premiums in the Health Insurance Marketplaces established by the Affordable Care Act (ACA) in 2018 make this an ongoing issue that could affect future elections. A seminal event that changed the course of policy and politics around health care reform is the 2016 presidential election. The results of the 2016 presidential election departed considerably from polling forecasts. Given the prominence of the Affordable Care Act in the election, we test whether changes in health insurance coverage at the county-level correlate with changes in party vote share in the presidential elections from 2008 through 2016. We find that a one-percentage-point increase in county health insurance coverage was associated with a 0.25-percentage-point increase in the vote share for the Democratic presidential candidate. We further find that these gains on the part of the Democratic candidate came almost fully at the expense of the Republican (as opposed to third-party) presidential candidates. We also estimate models separately for states that did and did not expand Medicaid and find no differential effect of insurance gains on Democratic vote share for states that expanded Medicaid compared to those that did not. Our results are consistent with the hypothesis that outcomes in health insurance markets played a role in the outcome of the 2016 presidential election. The decisions made by the current administration, and how those decisions affect health insurance coverage and costs, may be important factors in future elections as well.
+**Abstract**: XXX
 
 
 ## Data Sources:
