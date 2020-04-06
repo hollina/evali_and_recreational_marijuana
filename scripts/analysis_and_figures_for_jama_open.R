@@ -460,19 +460,21 @@ bar_plot <- ggplot(marijuana_data, aes(x = as.factor(mj_policy), y = cases_per_m
                colour = "black")  +
   theme(axis.text.x = element_text(size = 20),
         axis.text.y = element_text(size = 12, angle = 90, hjust = .5)) +
-  labs(title="Average case rate by state marijuana policy",
-       caption=
-         "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state
-        to be a recreational marijuana state if it had at least one 
-        recreational dispensary open in January 2019. Results
-        are robust to considering any state with an effective
-        recreational marijuana law as of 2019 (AK, CA, CO, DC,
-        ME, MA, MI, NV, OR, VT, WA) to be a recreational state.") +
+  labs(title="Average case rate by state marijuana policy") +
   theme(axis.title.x=element_text(size = 18),
         title=element_text(size = 15),
         plot.caption = element_text(hjust = 0))
 
 bar_plot
+
+#,
+#caption=
+ # "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state
+        # to be a recreational marijuana state if it had at least one 
+        # recreational dispensary open in January 2019. Results
+        # are robust to considering any state with an effective
+        # recreational marijuana law as of 2019 (AK, CA, CO, DC,
+        # ME, MA, MI, NV, OR, VT, WA) to be a recreational state."
 
 # Combine the two plots
 combined_plot <- plot_grid(dot_plot, bar_plot, ncol = 1, align = 'v', rel_heights = c(2,1))
@@ -566,20 +568,21 @@ bar_plot_ecig <- ggplot(marijuana_data, aes(x = as.factor(mj_policy), y = ecigar
                colour = "black")  +
   theme(axis.text.x = element_text(size = 20),
         axis.text.y = element_text(size = 12, angle = 90, hjust = .5)) +
-  labs(title="Average e-cig use by state marijuana policy",
-       caption=
-         "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state
-       to be a recreational marijuana state if it had at least one 
-       recreational dispensary open in January 2019. Results
-       are robust to considering any state with an effective
-       recreational marijuana law as of 2019 (AK, CA, CO, DC,
-       ME, MA, MI, NV, OR, VT, WA) to be a recreational state.") +
+  labs(title="Average e-cig use by state marijuana policy") +
   theme(axis.title.x=element_text(size = 18),
         title=element_text(size = 15),
         plot.caption = element_text(hjust = 0))
 
 bar_plot_ecig
 
+# ,
+# caption=
+#   "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state
+#        to be a recreational marijuana state if it had at least one 
+#        recreational dispensary open in January 2019. Results
+#        are robust to considering any state with an effective
+#        recreational marijuana law as of 2019 (AK, CA, CO, DC,
+#        ME, MA, MI, NV, OR, VT, WA) to be a recreational state."
 # Combine the two plots
 combined_plot_ecig <- plot_grid(dot_plot_ecig, bar_plot_ecig, ncol = 1, align = 'v', rel_heights = c(2,1))
 combined_plot_ecig
@@ -706,19 +709,21 @@ bar_plot_with_ci <- ggplot(mean_evali_by_mj_use, aes(x = as.factor(mj_policy), y
                colour = "black")  +
   theme(axis.text.x = element_text(size = 20),
         axis.text.y = element_text(size = 12, angle = 90, hjust = .5)) +
-  labs(title="Average case rate by state marijuana policy",
-       caption=
-         "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state to be a
-       recreational marijuana state if it had at least one rec dispensary
-       open in January 2019. Results are robust to considering any state 
-       with a rec marijuana law as of 2019 to be a rec state. Bars in
-       top panel reflect range of EVALI cases per million. Brackets in the
-       bottom panel display 95% confidence interval of each group mean.") +
+  labs(title="Average case rate by state marijuana policy") +
   theme(axis.title.x=element_text(size = 18),
         title=element_text(size = 15),
         plot.caption = element_text(hjust = 0))
 
 bar_plot_with_ci
+
+# ,
+# caption=
+#   "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state to be a
+#        recreational marijuana state if it had at least one rec dispensary
+#        open in January 2019. Results are robust to considering any state 
+#        with a rec marijuana law as of 2019 to be a rec state. Bars in
+#        top panel reflect range of EVALI cases per million. Brackets in the
+#        bottom panel display 95% confidence interval of each group mean."
 
 # Combine the two plots
 combined_plot_with_bars <- plot_grid(dot_plot_with_bounds, bar_plot_with_ci, ncol = 1, align = 'v', rel_heights = c(2,1))
@@ -792,19 +797,21 @@ bar_plot_ecig_with_ci <- ggplot(mean_ecig_by_mj_use, aes(x = as.factor(mj_policy
                colour = "black")  +
   theme(axis.text.x = element_text(size = 20),
         axis.text.y = element_text(size = 12, angle = 90, hjust = .5)) +
-  labs(title="Average e-cig use by state marijuana policy",
-       caption=
-         "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state to be a
-       recreational marijuana state if it had at least one rec dispensary
-       open in January 2019. Results are robust to considering any state 
-       with a rec marijuana law as of 2019 to be a rec state. Brackets
-       in the bottom panel display 95% confidence interval of each
-       group mean.") +
+  labs(title="Average e-cig use by state marijuana policy") +
   theme(axis.title.x=element_text(size = 18),
         title=element_text(size = 15),
         plot.caption = element_text(hjust = 0))
 
 bar_plot_ecig_with_ci
+
+# ,
+# caption=
+#   "Note: * p < 0.05, ** p < 0.01, *** p < 0.001. We consider a state to be a
+#        recreational marijuana state if it had at least one rec dispensary
+#        open in January 2019. Results are robust to considering any state 
+#        with a rec marijuana law as of 2019 to be a rec state. Brackets
+#        in the bottom panel display 95% confidence interval of each
+#        group mean."
 
 # Combine the two plots
 combined_plot_ecig_with_bars <- plot_grid(dot_plot_ecig, bar_plot_ecig_with_ci, ncol = 1, align = 'v', rel_heights = c(2,1))
@@ -889,17 +896,19 @@ print(my_doc, target =
 # Using figure
 
 # Scatter EVALI case  rate against e-cigarette use
+# 
+# title = "There is no discernable relationship between EVALI case rate\n and e-cigarette use",
+# caption=
+#   "Note: Best fit line is displayed in blue with a slope of -0.8 and a robust standard error of 0.9 
+#        (p-value of 0.36). 95% confidence interval is denoted by gray shaded area. Results
+#        are robust to weighting by state population."
+
 scatterplot <- ggplot(marijuana_data, aes(y = cases_per_million, x = ecigarette_use)) +
   geom_point(aes(fill=as.factor(mj_policy),shape=as.factor(mj_policy)), size=4) + 
   geom_smooth(method='lm_robust') +
   theme_classic() +
   labs(y="EVALI cases per million population", 
-       x = "Prevalence of e-cigarette use (0-100%)", 
-       title = "There is no discernable relationship between EVALI case rate\n and e-cigarette use",
-       caption=
-         "Note: Best fit line is displayed in blue with a slope of -0.8 and a robust standard error of 0.9 
-       (p-value of 0.36). 95% confidence interval is denoted by gray shaded area. Results
-       are robust to weighting by state population.") +
+       x = "Prevalence of e-cigarette use (0-100%)") +
   theme(axis.title.x=element_text(size = 18),
         title=element_text(size = 15),
         plot.caption = element_text(hjust = 0),
