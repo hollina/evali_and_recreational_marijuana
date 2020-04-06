@@ -6,12 +6,13 @@ Wing, Coady. Ashley Bradford, Aaron Carroll, and Alex Hollingsworth. (2020) "Ass
 
 
 <figure style="float:center;">
-<img src="https://github.com/hollina/evali_and_recreational_marijuana/blob/master/output/main_exhibit_with_bars.png"  width="600"  /> 
+<img src="https://github.com/hollina/evali_and_recreational_marijuana/blob/master/output/main_exhibit_with_bars.png"  width="800"  /> 
 </figure>
 
 
 
-**Abstract**: XXX
+**Abstract**: 
+In this paper we show that cases of vaping associated lung disease are lower in recreational marijuana states than in states with only medical marijuana or states with prohibition policies geared towards marijuana. The specific cause of the lung disease is unknown, but most patients report using e-cigarettes to consume the primary psychoactive component of marijuana. The Centers for Disease Control and Prevention have hypothesized that black-market THC products containing vitamin E acetate may cause the lung disease. Our paper provides additional suggestive evidence that black market THC products may be responsible since case rates are lower in recreational marijuana states. 
 
 
 ## Data Sources:
@@ -26,9 +27,7 @@ Data on **recreational and medicial marijuana status** come from Hollingsworth, 
 
 
 ## Software Used:
-All analysis were done on unix machines using R 3.6.1. We use a number of user-written packages (`plyr`, `cowplot`, `tidyverse`, `estimatr`, `tidylog`, `huxtable`, `flextable`, `ggrepel`, `mfx`, and `openxlsx`). We use `pacman` to load and install each of these. 
-
-                that should be outlined in the master.do file. We also use a number of shell commands from within stata (whenever the ! command is present). Most of these should still work on a non-unix system, but may need to be modified.
+All analysis were done on unix machines using R 3.6.1. We use a number of user-written packages (`plyr`, `cowplot`, `tidyverse`, `estimatr`, `tidylog`, `huxtable`, `flextable`, `ggrepel`, `mfx`, and `openxlsx`). We use `pacman` to load and install each of these in our analysis file. 
 
 ## License:
 Replication Package (this github repo): [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
